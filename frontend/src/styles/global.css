@@ -1,0 +1,14 @@
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+.titulo {
+    font-family: 'Bebas Neue', sans-serif;    
+    letter-spacing: 0.08em;
+}
+
+.background-login {
+    background-image: url('../assets/backgroundLoginCadastro.jpg');
+    background-size: cover;
+    background-position: center;
+}
