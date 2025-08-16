@@ -22,6 +22,7 @@ O objetivo é simular uma loja de instrumentos musicais, oferecendo listagem de 
 - Ruby on Rails
 - PostgreSQL
 - Devise (para autenticação)
+- Stripe (para pagamentos)
 
 ---
 
@@ -31,6 +32,7 @@ O objetivo é simular uma loja de instrumentos musicais, oferecendo listagem de 
 - Organização de produtos por categoria.
 - Integração entre frontend e backend via API RESTful.
 - Estrutura pronta para carrinho de compras e autenticação de usuários.
+- Sistema de pagamentos implementado 
 
 ---
 
