@@ -1,5 +1,6 @@
 class Produto < ApplicationRecord
   belongs_to :categoria
+  has_many :cart_items
 
   def as_json(options = {})
     super(options).merge({

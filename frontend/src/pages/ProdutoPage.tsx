@@ -17,7 +17,7 @@ type ProdutoType = {
   categoria_id: number;
 };
 
-const zoomFactor = 3; 
+const zoomFactor = 2.5;
 
 function ProdutoPage() {
   const { slug } = useParams();
@@ -32,6 +32,39 @@ function ProdutoPage() {
     x: 0,
     y: 0,
   });
+
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const modalDuration = 4000; 
+
+  const addToCart = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Você precisa estar logado para adicionar ao carrinho.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "http://127.0.0.1:3000/cart_items",
+        { cart_item: { produto_id: produto?.id, quantidade: 1 } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setShowCartModal(true);
+      setIsClosing(false);
+
+      setTimeout(() => {
+        setIsClosing(true);
+        setTimeout(() => {
+          setShowCartModal(false);
+        }, 500);
+      }, modalDuration);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao adicionar ao carrinho.");
+    }
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -88,7 +121,7 @@ function ProdutoPage() {
     setShowMagnifier(false);
   };
 
-  if (!produto) return;
+  if (!produto) return null;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -110,7 +143,7 @@ function ProdutoPage() {
               />
               {showMagnifier && (
                 <div
-                  className="absolute w-64 h-64 rounded-full border-1 border-white shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-1/2"
+                  className="absolute w-64 h-64 rounded-full border border-white shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-1/2"
                   style={{
                     left: `${magnifierPosition.x}px`,
                     top: `${magnifierPosition.y}px`,
@@ -148,7 +181,19 @@ function ProdutoPage() {
                     </button>
                   </div>
                 </div>
-                <button className="p-2 rounded text-white font-bold text-base mt-2 bg-blue-500 cursor-pointer">
+                <button
+                  onClick={addToCart}
+                  className="p-2 border-2 rounded font-semibold text-blue-500 bg-transparent cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <i className="bx bx-cart-plus text-2xl"></i>
+                  Adicionar ao Carrinho
+                </button>
+                <button
+                  onClick={() => {
+                    navigate(`/checkout`);
+                  }}
+                  className="p-2 rounded text-white font-semibold text-base bg-blue-500 cursor-pointer"
+                >
                   Comprar
                 </button>
               </div>
@@ -209,10 +254,45 @@ function ProdutoPage() {
             </div>
           )}
         </div>
-        <Titulo Texto="O que nossos clientes dizem"></Titulo>
-        <Depoimentos></Depoimentos>
+
+        <Titulo Texto="O que nossos clientes dizem" />
+        <Depoimentos />
       </div>
       <Footer />
+
+      {showCartModal && produto && (
+        <div
+          className={`fixed bottom-5 left-1/2 -translate-x-1/2 bg-white border border-gray-300 shadow-2xl rounded-lg py-4 px-10 z-50 flex flex-col items-center justify-between ${
+            isClosing ? "animate-fade-out-down" : "animate-fade-in-up"
+          }`}
+        >
+          <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden mb-3">
+            <div
+              key={Date.now()}
+              className="h-full bg-blue-500"
+              style={{
+                animation: `progressBar ${modalDuration}ms linear forwards`,
+              }}
+            ></div>
+          </div>
+
+          <img
+            src={produto.img ? produto.img : "/src/assets/no-image.png"}
+            alt={produto.nome}
+            className="w-16 h-16 rounded-full object-cover mr-4 border-green-500 border"
+          />
+          <div className="text-center mt-3">
+            <p className="font-semibold">Adicionado ao carrinho!</p>
+            <p className="text-sm text-gray-800 text-center">{produto.nome}</p>
+          </div>
+          <button
+            onClick={() => navigate("/carrinho")}
+            className="bg-blue-500 text-white font-semibold text-sm py-2 px-4 rounded hover:bg-blue-600 transition-colors whitespace-nowrap cursor-pointer mt-3"
+          >
+            Ir para o Carrinho
+          </button>
+        </div>
+      )}
     </div>
   );
 }

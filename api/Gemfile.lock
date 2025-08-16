@@ -285,6 +285,7 @@ GEM
       hashie (>= 0.1.0, < 6)
       version_gem (>= 1.1.8, < 3)
     stringio (3.1.7)
+    stripe (15.4.0)
     thor (1.4.0)
     timeout (0.4.3)
     tzinfo (2.0.6)
@@ -324,6 +325,7 @@ DEPENDENCIES
   rack-cors
   rails (~> 7.1.5, >= 7.1.5.1)
   rails_live_reload
+  stripe (~> 15.4)
   tzinfo-data
 
 RUBY VERSION

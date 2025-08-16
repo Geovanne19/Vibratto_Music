@@ -19,7 +19,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       frontend_url = "http://localhost:5173/home"
 
       # 4. Redirecionar para o frontend com o token na URL
-      redirect_to "#{frontend_url}?token=#{token}&nome=#{@user.nome}&email=#{@user.email}", allow_other_host: true
+      redirect_to "#{frontend_url}?token=#{token}&nome=#{CGI.escape(@user.nome)}&email=#{CGI.escape(@user.email)}&url_img=#{CGI.escape(@user.url_img)}", allow_other_host: true
     else
       error_message = @user.errors.full_messages.join("\n")
       redirect_to "http://localhost:3000/login?error=#{CGI.escape(error_message)}", allow_other_host: true

@@ -58,3 +58,5 @@ group :development do
   # gem "spring"
 end
 
+
+gem "stripe", "~> 15.4"

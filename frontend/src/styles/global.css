@@ -12,3 +12,44 @@
     background-size: cover;
     background-position: center;
 }
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes progressBar {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-in-out forwards;
+}
+
+.animate-fade-out-down {
+  animation: fadeOutDown 0.5s ease-in-out forwards;
+}
+

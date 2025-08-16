@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import logo from "../assets/logo-vibratto.png";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 type Produto = {
   id: number;
@@ -8,7 +9,6 @@ type Produto = {
   img: string;
 };
 
-// Define a interface para os dados do usuário
 type UserData = {
   nome: string;
   email: string;
@@ -21,11 +21,32 @@ export const Header = () => {
   const [resultados, setResultados] = useState<Produto[]>([]);
   const [showResultados, setShowResultados] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState<UserData | null>(null); // Novo estado para os dados do usuário
-  const [showUserDetails, setShowUserDetails] = useState(false); // Novo estado para exibir os detalhes do usuário
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [showUserDetails, setShowUserDetails] = useState(false); 
+  const userDetailsRef = useRef<HTMLDivElement |null>(null);
+
+   useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          userDetailsRef.current &&
+          !userDetailsRef.current.contains(event.target as Node)
+        ) {
+          setShowUserDetails(false);
+        }
+      };
+
+      if (showUserDetails) {
+        document.addEventListener("mousedown", handleClickOutside);
+      } else {
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [showUserDetails]);
 
   useEffect(() => {
-    // 1. Tentar carregar os dados do localStorage ao iniciar
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("userData");
 
@@ -34,7 +55,6 @@ export const Header = () => {
       setUserData(JSON.parse(storedUser));
     }
 
-    // 2. Processar a URL após o login do Google (se houver parâmetros)
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get("token");
     const nome = urlParams.get("nome");
@@ -42,7 +62,6 @@ export const Header = () => {
     const url_img = urlParams.get("url_img");
 
     if (urlToken && nome && email && url_img) {
-      // Salvar as informações no localStorage
       localStorage.setItem("token", urlToken);
       const user = { nome, email, url_img };
       localStorage.setItem("userData", JSON.stringify(user));
@@ -50,7 +69,6 @@ export const Header = () => {
       setIsLoggedIn(true);
       setUserData(user);
 
-      // Limpar os parâmetros da URL para evitar problemas de segurança
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -74,12 +92,36 @@ export const Header = () => {
     }
   }, [busca, produtos]);
 
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const res = await fetch("http://127.0.0.1:3000/cart_items", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          const total = data.reduce(
+            (sum: number, item: any) => sum + item.quantidade,
+            0
+          );
+          setCartCount(total);
+        } catch (err) {
+          console.error("Erro ao buscar carrinho:", err);
+        }
+      }
+    };
+    fetchCart();
+  }, [isLoggedIn]);
+
+
   const handleGoogleLogin = () => {
     window.location.href = "http://127.0.0.1:3000/users/auth/google_oauth2";
   };
 
   const handleLogout = () => {
-    // Apenas remove os dados do localStorage e atualiza o estado
     localStorage.removeItem("token");
     localStorage.removeItem("userData");
     setIsLoggedIn(false);
@@ -93,7 +135,7 @@ export const Header = () => {
         onClick={() => {
           window.location.href = "/home";
         }}
-        className="h-14"
+        className="h-13"
         src={logo}
         alt="logo"
       />
@@ -141,17 +183,33 @@ export const Header = () => {
       </div>
 
       {isLoggedIn && userData ? (
-        // Se o usuário estiver logado, exibe a foto e o pop-up
         <div className="relative">
-          <img
-            src={userData.url_img}
-            alt={userData.nome}
-            onClick={() => setShowUserDetails(!showUserDetails)}
-            className="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:border-blue-500 transition duration-200"
-          />
+          <div className="relative flex items-center gap-6">
+            <div
+              className="relative mt-2 cursor-pointer"
+              onClick={() => (window.location.href = "/carrinho")}
+            >
+              <i className="bx bx-cart text-3xl"></i>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-2 px-[5.5px] w-4 h-4 text-[.7rem] text-white bg-blue-500 rounded-full flex items-center justify-center">
+                  <p>{cartCount}</p>
+                </span>
+              )}
+            </div>
+
+            <img
+              src={userData.url_img}
+              alt={userData.nome}
+              onClick={() => setShowUserDetails(!showUserDetails)}
+              className="w-11 h-11 rounded-full cursor-pointer border-2 border-transparent hover:border-blue-500 transition duration-200"
+            />
+          </div>
 
           {showUserDetails && (
-            <div className="absolute top-12 right-0 w-max bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+            <div
+              ref={userDetailsRef}
+              className="absolute top-12 right-0 w-max bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+            >
               <div className="flex items-center gap-3 mb-2">
                 <img
                   src={userData.url_img}
@@ -163,19 +221,18 @@ export const Header = () => {
                   <p className="text-sm text-gray-500">{userData.email}</p>
                 </div>
               </div>
-              <hr className="my-2" />
+              <hr className="my-2 text-gray-400" />
               <button
                 onClick={handleLogout}
-                className="w-full text-left flex items-center gap-2 text-red-500 hover:bg-red-50 hover:text-red-700 p-2 rounded-md transition duration-200"
+                className="w-full text-left flex items-center gap-1 text-red-500 hover:bg-red-50 hover:text-red-700 p-2 rounded-md transition duration-200 cursor-pointer"
               >
-                <i className="bx bx-log-out text-xl"></i>
-                <span>Sair</span>
+                {<LogoutIcon fontSize="small" />}
+                <span className="text-sm">Sair</span>
               </button>
             </div>
           )}
         </div>
       ) : (
-        // Se o usuário não estiver logado, exibe o botão
         <button
           onClick={handleGoogleLogin}
           className="cursor-pointer bg-blue-500 text-white font-semibold rounded-3xl pl-2 pr-4 py-2 flex items-center gap-2 hover:bg-blue-600 transition duration-200"
