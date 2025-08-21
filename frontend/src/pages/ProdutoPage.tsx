@@ -291,9 +291,9 @@ function ProdutoPage() {
           >
             Ir para o Carrinho
           </button>
-        </div>
+        </div> 
       )}
-    </div>
+    </div> 
   );
 }
 
