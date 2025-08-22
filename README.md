@@ -55,6 +55,8 @@ rails db:create db:migrate db:seed
 # Inicie o servidor
 rails server
 ```
+### Frontend (React)
+
 ```bash
 # Entre na pasta do frontend
 cd vibratto/frontend
