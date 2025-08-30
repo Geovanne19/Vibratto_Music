@@ -41,7 +41,7 @@ O objetivo é simular uma loja de instrumentos musicais, oferecendo listagem de 
 ### Backend (Rails)
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/vibratto.git
+git clone https://github.com/Geovanne19/Vibratto_Music.git
 
 # Entre na pasta do backend
 cd vibratto/backend
